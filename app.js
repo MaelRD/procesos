@@ -173,8 +173,8 @@ function renderHome() {
     document.getElementById("dept-clear").innerHTML = "";
   }
 
-  // Guide cards: Dibujamos el resto de guías, excluyendo a la destacada que ya está en el Hero
-  const others = featured ? guides.filter((g) => g.id !== featured.id).slice(0, 8) : [];
+  // Guide cards: Dibujamos todas las guías en la cuadrícula inferior (incluyendo la destacada)
+  const others = featured ? guides.slice(0, 8) : [];
   document.getElementById("guides-grid").innerHTML = others.length
     ? others
         .map((g) => {
