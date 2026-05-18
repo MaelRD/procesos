@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Procesos Odoo.</title>
+  <meta name="description"
+    content="Repositorio interno de guías paso a paso para el ERP. Compras, Ventas, Contabilidad, Inventario y Recepción." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- Progress bar -->
+  <div id="progress-bar-wrap"
+    style="position:fixed;top:0;left:0;right:0;height:3px;background:var(--bg2);z-index:100;display:none">
+    <div id="top-progress"
+      style="height:100%;width:0%;background:linear-gradient(90deg,var(--acc),var(--acc2));box-shadow:0 0 8px var(--acc);transition:width .4s ease">
+    </div>
+  </div>
+
+  <!-- App shell -->
+  <div id="app">
+
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="logo" onclick="navigate('home')" style="cursor:pointer">
+          <div class="logo-dot"></div>
+          <div class="logo-name serif">Procesos</div>
+          <div class="logo-tag mono">Odoo</div>
+        </div>
+        <nav class="topbar-nav">
+          <!-- Botones de navegación principal. Al hacer clic, navegan al inicio y filtran por departamento -->
+          <button id="nav-home" class="nav-btn active" onclick="navigate('home', {dept: null})">Inicio</button>
+          <button id="nav-compras" class="nav-btn" onclick="navigate('home', {dept: 'compras'})">Compras</button>
+          <button id="nav-ventas" class="nav-btn" onclick="navigate('home', {dept: 'ventas'})">Ventas</button>
+          <button id="nav-contabilidad" class="nav-btn" onclick="navigate('home', {dept: 'contabilidad'})">Contabilidad</button>
+          <button id="nav-inventario" class="nav-btn" onclick="navigate('home', {dept: 'inventario'})">Inventario</button>
+        </nav>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+          <div class="search-box" onclick="openSearch()" id="search-trigger">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round">
+              <circle cx="11" cy="11" r="7" />
+              <path d="M21 21l-4.3-4.3" />
+            </svg>
+            <span>Buscar guías…</span>
+            <span class="kbd">⌘K</span>
+          </div>
+          <div class="avatar">MG</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- HOME page -->
+    <main id="page-home" class="page active">
+      <div id="hero-wrap"></div>
+      <div style="max-width:1280px;margin:0 auto;padding:40px 24px 0">
+        <div id="depts-wrap"></div>
+        <div id="dept-clear"></div>
+        <div class="guides-section">
+          <div>
+            <div class="guides-header">
+              <div style="display:flex;align-items:baseline;gap:10px">
+                <h2 class="serif" style="font-size:22px;font-weight:700;letter-spacing:-.3px">Todas las guías</h2>
+                <span id="guides-count-badge"
+                  style="padding:2px 8px;background:var(--surf);border:1px solid var(--bdr);border-radius:99px;font-size:11px;font-weight:700;color:var(--txt3)">14</span>
+              </div>
+              <div class="filter-row" id="filter-row"></div>
+            </div>
+            <div class="guide-grid" id="guides-grid"></div>
+          </div>
+          <aside id="sidebar-content"></aside>
+        </div>
+      </div>
+    </main>
+
+    <!-- GUIDE DETAIL page -->
+    <div id="page-guide" class="page">
+      <div class="guide-hero" id="guide-hero" style="position:relative;min-height:380px;overflow:hidden"></div>
+      <div class="guide-detail-body">
+        <aside>
+          <div style="position:sticky;top:24px">
+            <div id="guide-toc"></div>
+          </div>
+        </aside>
+        <article id="guide-steps" class="steps-list"></article>
+      </div>
+    </div>
+
+  </div><!-- end #app -->
+
+  <!-- Present mode overlay -->
+  <div id="present-overlay" class="present-overlay">
+    <div class="present-topbar">
+      <div style="display:inline-flex;align-items:center;gap:8px">
+        <div class="logo-dot"></div>
+        <span class="serif" style="font-size:14px;font-weight:700;color:rgba(255,255,255,.8)">Procesos</span>
+        <span style="font-size:11.5px;color:rgba(255,255,255,.4)">·&nbsp;<span id="present-dept"></span></span>
+      </div>
+      <div
+        style="margin-left:auto;display:flex;align-items:center;gap:14px;color:rgba(255,255,255,.55);font-size:11.5px">
+        <span class="mono" id="present-counter"></span>
+        <button onclick="closePresent()"
+          style="padding:5px 11px;border:1px solid rgba(255,255,255,.18);border-radius:6px;font-size:11px;color:rgba(255,255,255,.7);background:rgba(255,255,255,.06)">Esc
+          para salir</button>
+      </div>
+    </div>
+
+    <div class="present-main">
+      <div>
+        <div style="display:flex;align-items:flex-start;gap:24px;margin-bottom:22px">
+          <div class="present-step-big serif" id="present-step-num"></div>
+          <div style="padding-top:14px">
+            <div class="present-step-label mono" id="present-step-label"></div>
+            <h1 class="present-step-title" id="present-step-title"></h1>
+          </div>
+        </div>
+        <p class="present-step-body" id="present-step-body"></p>
+      </div>
+      <div class="present-img">Vista previa del paso</div>
+    </div>
+
+    <div class="present-controls">
+      <button class="present-btn-round" onclick="presentNav(-1)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+          stroke-linecap="round">
+          <path d="M19 12H5M11 6l-6 6 6 6" />
+        </svg>
+      </button>
+      <div class="present-dots" id="present-dots"></div>
+      <button class="btn-accent" onclick="presentNav(1)">
+        Siguiente&nbsp;
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+          stroke-linecap="round">
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Search modal -->
+  <div id="search-modal" class="search-modal" onclick="if(event.target===this)closeSearch()">
+    <div class="search-box-modal">
+      <div class="search-input-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round">
+          <circle cx="11" cy="11" r="7" />
+          <path d="M21 21l-4.3-4.3" />
+        </svg>
+        <input id="search-input" type="text" placeholder="Buscar guías, procesos, módulos…"
+          oninput="doSearch(this.value)" />
+        <button onclick="closeSearch()" style="color:var(--txt3)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div id="search-results"></div>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>
