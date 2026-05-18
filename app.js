@@ -369,8 +369,23 @@ function presentNav(dir) {
   const guide = GUIDES.find((g) => g.id === presentGuideId);
   if (!guide) return;
   const max = Math.min(guide.steps, getStepsForGuide(presentGuideId).length) - 1;
+  
+  // Automarcar progreso: Si el usuario da a "Siguiente", consideramos completado el paso actual
+  if (dir > 0) {
+    const currentProg = getGuideProgress(presentGuideId);
+    if (state.presentStep >= currentProg) {
+      setProgress(presentGuideId, state.presentStep + 1);
+    }
+  }
+
   state.presentStep = Math.max(0, Math.min(max, state.presentStep + dir));
   renderPresent();
+  
+  // Actualizar la guía de fondo silenciosamente
+  if (state.page === "guide" && state.guide === presentGuideId) {
+    renderGuide();
+    updateProgressBar();
+  }
 }
 
 function renderPresent() {
@@ -396,6 +411,23 @@ function renderPresent() {
         `<div class="present-dot" style="background:${i < curr ? "var(--acc)" : i === curr ? "var(--acc2)" : "rgba(255,255,255,.12)"}"></div>`,
     )
     .join("");
+
+  // Mostrar la imagen dinámicamente en el modo presentación
+  const imgWrap = document.getElementById("present-img-wrap");
+  if (imgWrap) {
+    if (s.img) {
+      imgWrap.innerHTML = `<img src="${s.img}" alt="${s.title}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.4)">`;
+      imgWrap.style.padding = "0";
+      imgWrap.style.border = "none";
+      imgWrap.style.background = "transparent";
+    } else {
+      imgWrap.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--txt3);font-size:13px">Captura de pantalla · paso ${s.n}</div>`;
+      imgWrap.style.padding = "20px";
+      imgWrap.style.border = "1px dashed rgba(255,255,255,0.15)";
+      imgWrap.style.background = "rgba(255,255,255,0.02)";
+      imgWrap.style.borderRadius = "12px";
+    }
+  }
 }
 
 // ── SEARCH ─────────────────────────────────────────────────────────────────
